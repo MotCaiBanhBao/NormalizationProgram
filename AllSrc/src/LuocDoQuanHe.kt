@@ -4,20 +4,36 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
     val right = rightList
     val functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
     fun timBaoDong(thuocTinhCanTim:String):String{
+        var kiemtra: MutableList<Int> = mutableListOf()
         var conThayDoi = true
         var baoDong = thuocTinhCanTim
         while (conThayDoi){
             conThayDoi = false;
-            for(temp in right)
-                if(baoDong.contains(temp)){
-                    val thuocTinhThem = left[right.indexOf(temp)]
-                    if(!baoDong.contains(thuocTinhThem)){
-                        baoDong += left[right.indexOf(temp)]
+            for(temp in left)
+                if(isContains(baoDong, temp)){
+                    val thuocTinhThem = right[left.indexOf(temp)]
+                    if(!isContains(baoDong, thuocTinhThem)){
+                        baoDong = addAtribute(baoDong, thuocTinhThem)
                         conThayDoi = true
                     }
                 }
         }
         return baoDong
+    }
+    private fun addAtribute(source: String, atribute: String): String{
+        var result = source
+        var atributeArray = atribute.toCharArray()
+        for(oneAtribute in atributeArray)
+            if(!result.contains(oneAtribute))
+                result += oneAtribute
+        return result
+    }
+     fun isContains(Container: String, needCheckString: String): Boolean{
+        val needCheckToArray = needCheckString.toCharArray()
+        for(temp in needCheckToArray)
+            if(!Container.contains(temp))
+                return false
+        return true
     }
     fun findMinimalCover(){
         var sizeOfMap = functionalDependency[0].size
@@ -59,28 +75,33 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
     fun findLHSExtraneous(){
         var sizeOfSet = functionalDependency[0].size
         for(temp in 0 until sizeOfSet){
-            for (temp2 in findAllSubString(functionalDependency[0][temp].toCharArray())){
-                if(timBaoDong(temp2.toString()).contains(functionalDependency[1][temp])){
+            var subString = findAllSubString(functionalDependency[0][temp])
+            for (temp2 in subString){
+                if(isContains(timBaoDong(temp2), functionalDependency[1][temp])){
                     functionalDependency[0][temp] = temp2
-                    break
                 }
             }
         }
         println("All list l ${functionalDependency[0]}")
         println("All list r ${functionalDependency[1]}")
     }
-    fun findAllSubString(array: CharArray): MutableList<String>{
-        val arrSize = array.size
+    fun findAllSubString(source: String): MutableList<String>{
+        var sourceArray = source.toCharArray()
+        val arrSize = source.length
         var result: MutableList<String> = mutableListOf()
         var tempString: String = ""
         for (startPoint in 0 until arrSize) {
             for (temp in startPoint until arrSize) {
                 for (temp2 in startPoint .. temp){
-                    tempString += array[temp2]
+                    tempString += sourceArray[temp2]
                 }
                 result.add(tempString)
                 tempString = ""
             }
+        }
+        for(i in 0 until result.size-1){
+            if(result[i].length==arrSize)
+                result.removeAt(i)
         }
         return result
     }
