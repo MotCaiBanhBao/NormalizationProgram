@@ -2,16 +2,16 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
     val u: String = u
     val left = leftList
     val right = rightList
-    val functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
+    var functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
 
-    private fun findClosure(source:String):String{
+    private fun findClosure(source:String, fDs: MutableList<MutableList<String>>):String{
         var isStillChangeAble = true
         var closure = source
         while (isStillChangeAble){
             isStillChangeAble = false;
-            for(index in 0 until functionalDependency[0].size)
-                if(isContains(closure, functionalDependency[0][index])){
-                    val addAttribute = functionalDependency[1][index]
+            for(index in 0 until fDs[0].size)
+                if(isContains(closure, fDs[0][index])){
+                    val addAttribute = fDs[1][index]
                     if(!isContains(closure, addAttribute)){
                         closure = addAttribute(closure, addAttribute)
                         isStillChangeAble = true
@@ -74,7 +74,7 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
         for(temp in 0 until sizeOfSet){
             var subString = findAllSubString(functionalDependency[0][temp])
             for (temp2 in subString){
-                if(isContains(findClosure(temp2), functionalDependency[1][temp])){
+                if(isContains(findClosure(temp2, functionalDependency), functionalDependency[1][temp])){
                     functionalDependency[0][temp] = temp2
                     break
                 }
@@ -100,6 +100,22 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
                 result.removeAt(i)
         }
         return result
+    }
+    fun removeRedundantFunctional(){
+        var size = functionalDependency.size
+        for (index in 0 until size){
+            var temp = removeFD(functionalDependency, index)
+            println(functionalDependency[0][index])
+            print(findClosure(functionalDependency[0][index], temp))
+            if (isContains(findClosure(functionalDependency[0][index], temp), functionalDependency[1][index])){
+                functionalDependency = removeFD(functionalDependency, index)
+            }
+        }
+    }
+    private fun removeFD(source: MutableList<MutableList<String>>, index: Int): MutableList<MutableList<String>>{
+        source[0].removeAt(index)
+        source[1].removeAt(index)
+        return source
     }
     fun output(){
         for(i in 0 until functionalDependency[0].size){
