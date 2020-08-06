@@ -3,8 +3,8 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
     val left = leftList
     val right = rightList
     val functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
+
     fun timBaoDong(thuocTinhCanTim:String):String{
-        var kiemtra: MutableList<Int> = mutableListOf()
         var conThayDoi = true
         var baoDong = thuocTinhCanTim
         while (conThayDoi){
@@ -47,8 +47,9 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
             temp++
         }
         removeDuplicate()
-        println("All list l ${functionalDependency[0]}")
-        println("All list r ${functionalDependency[1]}")
+        for(i in 0 until functionalDependency[0].size){
+            println("${functionalDependency[0][i]} -> ${functionalDependency[1][i]}")
+        }
     }
     fun convertRHS(index: Int){
         for(temp in (functionalDependency[1][index]).toCharArray()){
@@ -73,17 +74,21 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
         }
     }
     fun findLHSExtraneous(){
-        var sizeOfSet = functionalDependency[0].size
+        var tempFunctionalDependency : MutableList<MutableList<String>> = mutableListOf()
+        tempFunctionalDependency.addAll(functionalDependency)
+        var sizeOfSet = tempFunctionalDependency[0].size
         for(temp in 0 until sizeOfSet){
-            var subString = findAllSubString(functionalDependency[0][temp])
+            var subString = findAllSubString(tempFunctionalDependency[0][temp])
             for (temp2 in subString){
-                if(isContains(timBaoDong(temp2), functionalDependency[1][temp])){
-                    functionalDependency[0][temp] = temp2
+                if(isContains(timBaoDong(temp2), tempFunctionalDependency[1][temp])){
+                    tempFunctionalDependency[0][temp] = temp2
+                    break
                 }
             }
         }
-        println("All list l ${functionalDependency[0]}")
-        println("All list r ${functionalDependency[1]}")
+        for(i in 0 until sizeOfSet){
+            println("${tempFunctionalDependency[0][i]} -> ${tempFunctionalDependency[1][i]}")
+        }
     }
     fun findAllSubString(source: String): MutableList<String>{
         var sourceArray = source.toCharArray()
