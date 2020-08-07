@@ -102,21 +102,18 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
         return result
     }
     fun removeRedundantFunctional(){
-        var size = functionalDependency.size
-
-        for (index in 0 until size){
-            var temp: MutableList<MutableList<String>> = mutableListOf()
-            temp.addAll(functionalDependency)
-            removeFD(temp, index)
-            if (isContains(findClosure(functionalDependency[0][index], temp), functionalDependency[1][index])){
-                removeFD(functionalDependency, index)
-            }
+        for(temp in 0 until functionalDependency[0].size){
+            var tempAttribute = functionalDependency[0][temp]
+            functionalDependency[0][temp] = "null"
+            if(isContains(findClosure(tempAttribute, functionalDependency), functionalDependency[1][temp]))
+                functionalDependency[1][temp] = "null"
+            else
+                functionalDependency[0][temp] = tempAttribute
         }
+        functionalDependency[0].removeIf{String-> String.contentEquals("null")}
+        functionalDependency[1].removeIf{String-> String.contentEquals("null")}
     }
-    private fun removeFD(source: MutableList<MutableList<String>>, index: Int){
-        source[0].removeAt(index)
-        source[1].removeAt(index)
-    }
+
     fun output(fDs: MutableList<MutableList<String>>){
         for(i in 0 until fDs[0].size){
             println("${fDs[0][i]} -> ${fDs[1][i]}")
