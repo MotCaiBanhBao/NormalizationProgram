@@ -86,7 +86,7 @@ class LuocDoQuanHe(leftList: MutableList<String>, private var u: String, rightLi
         findSubSequences(source, "", allSubstring)
         allSubstring.removeAt(allSubstring.size-1)
         allSubstring.sortBy { it.length }
-        for(i in 0 until allSubstring.size-1){
+        for(i in 0 until allSubstring.size){
             if(allSubstring[i].length==source.length)
                 allSubstring.removeAt(i)
         }
@@ -175,8 +175,8 @@ class LuocDoQuanHe(leftList: MutableList<String>, private var u: String, rightLi
 
     fun checkForm(){
         println(if(is2NF()) "Là 2 NF" else "Không phải là 2NF")
-        /*println(if(is3NF()) "Là 3 NF" else "Không phải là 3NF")
-        println(if(isBCNF()) "Là BCNF" else "Không phải là BCNF")*/
+        println(if(is3NF()) "Là 3 NF" else "Không phải là 3NF")
+        println(if(isBCNF()) "Là BCNF" else "Không phải là BCNF")
     }
     private fun is2NF(): Boolean{
         val allKey = findCandidateKey()
@@ -184,6 +184,8 @@ class LuocDoQuanHe(leftList: MutableList<String>, private var u: String, rightLi
         val notPrimeKey = setDifference(u, allKeyString)
         for (temp in allKey){
             val subString = findAllSubString(temp)
+            println(temp)
+            println(subString)
             for (tempSubString in subString){
                 if (isContains(findClosure(tempSubString, functionalDependency), notPrimeKey))
                     return false
@@ -191,12 +193,23 @@ class LuocDoQuanHe(leftList: MutableList<String>, private var u: String, rightLi
         }
         return true
     }
-    /*fun is3NF(): Boolean{
-
+    private fun is3NF(): Boolean{
+        val allKey = findCandidateKey()
+        val nonKey = setDifference(u, allKey.toString())
+        for (temp in 0 until functionalDependency[0].size){
+            if (!isEqual(u, findClosure(functionalDependency[0][temp], functionalDependency))|| isContains( functionalDependency[1][temp], nonKey)){
+                return false
+            }
+        }
+        return true
     }
-    fun isBCNF(): Boolean{
-
-    }*/
+    private fun isBCNF(): Boolean{
+        for (temp in 0 until functionalDependency[0].size){
+            if (!isEqual(u, findClosure(functionalDependency[0][temp], functionalDependency)))
+                return false
+        }
+        return true
+    }
     fun output(fDs: MutableList<MutableList<String>>){
         for(i in 0 until fDs[0].size){
             println("${fDs[0][i]} -> ${fDs[1][i]}")
