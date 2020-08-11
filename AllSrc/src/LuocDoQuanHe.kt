@@ -1,10 +1,10 @@
-class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableList<String>) {
-    val u: String = u
+class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: MutableList<String>) {
     val left = leftList
     val right = rightList
     var functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
 
-    private fun findClosure(source:String, fDs: MutableList<MutableList<String>>):String{
+    var allSubstring: MutableList<String> = mutableListOf()
+    fun findClosure(source:String, fDs: MutableList<MutableList<String>>):String{
         var isStillChangeAble = true
         var closure = source
         while (isStillChangeAble){
@@ -81,26 +81,19 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
             }
         }
     }
-    private fun findAllSubString(source: String): MutableList<String>{
-        var sourceArray = source.toCharArray()
-        val arrSize = source.length
-        var result: MutableList<String> = mutableListOf()
-        var tempString: String = ""
-        for (startPoint in 0 until arrSize) {
-            for (temp in startPoint until arrSize) {
-                for (temp2 in startPoint .. temp){
-                    tempString += sourceArray[temp2]
-                }
-                result.add(tempString)
-                tempString = ""
-            }
+     fun findAllSubString(source: String): MutableList<String>{
+         findsubsequences(source, "")
+         return allSubstring
+     }
+    fun findsubsequences(s: String, ans: String){
+        if(s.length==0){
+            allSubstring.add(ans)
+            return
         }
-        for(i in 0 until result.size-1){
-            if(result[i].length==arrSize)
-                result.removeAt(i)
-        }
-        return result
+        findsubsequences(s.substring(1), ans+ s.get(0))
+        findsubsequences(s.substring(1), ans)
     }
+
     fun removeRedundantFunctional(){
         for(temp in 0 until functionalDependency[0].size){
             var tempAttribute = functionalDependency[0][temp]
@@ -114,6 +107,57 @@ class LuocDoQuanHe(leftList: MutableList<String>, u: String, rightList: MutableL
         functionalDependency[1].removeIf{String-> String.contentEquals("null")}
     }
 
+    fun findCandidateKey(){
+        var result: MutableList<String> = mutableListOf()
+        var r = mutableLisToString(functionalDependency[1])
+        var s = setDifference(u, r)
+        if (isEqual(u, findClosure("s", functionalDependency))) {
+            println("Chỉ có 1 candidate key là $s")
+            return
+        }
+        var l = mutableLisToString(functionalDependency[0])
+        var lIntersectionR = intersection(l, r)
+        for (temp in findAllSubString(lIntersectionR)){
+            var attributeNeedCheck = temp + s
+            if (isEqual(u, findClosure(attributeNeedCheck, functionalDependency))){
+                result.add(attributeNeedCheck)
+            }
+        }
+        println(result)
+    }
+
+    private fun isEqual(source: String, needCheck: String): Boolean{
+        val sourceArray = source.toCharArray()
+        for (temp in sourceArray)
+            if (!isContains(needCheck, temp.toString()))
+                return false
+        return true
+    }
+    private fun intersection(r:String, s:String): String{
+        var result = ""
+        var sArray = s.toCharArray()
+        for (temp in sArray){
+            if(isContains(r, temp.toString()))
+                result+=temp.toString()
+        }
+        return result
+    }
+    private fun mutableLisToString(source: MutableList<String>): String{
+        var result = ""
+        for (temp in source)
+            if (!isContains(result, temp))
+                result+=temp
+        return result
+    }
+    private fun setDifference(source: String, attribute: String): String{
+        var result = ""
+        var sourceArray = source.toCharArray()
+        for (temp in sourceArray){
+            if(!isContains(attribute, temp.toString()))
+                result+=temp.toString()
+        }
+        return result
+    }
     fun output(fDs: MutableList<MutableList<String>>){
         for(i in 0 until fDs[0].size){
             println("${fDs[0][i]} -> ${fDs[1][i]}")
