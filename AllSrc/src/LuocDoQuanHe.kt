@@ -3,7 +3,7 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
     val right = rightList
     var functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
 
-    var allSubstring: MutableList<String> = mutableListOf()
+
     fun findClosure(source:String, fDs: MutableList<MutableList<String>>):String{
         var isStillChangeAble = true
         var closure = source
@@ -82,16 +82,17 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
         }
     }
      fun findAllSubString(source: String): MutableList<String>{
-         findsubsequences(source, "")
+         var allSubstring: MutableList<String> = mutableListOf()
+         findsubsequences(source, "", allSubstring)
          return allSubstring
      }
-    fun findsubsequences(s: String, ans: String){
+    fun findsubsequences(s: String, ans: String, allSubstring: MutableList<String>){
         if(s.length==0){
             allSubstring.add(ans)
             return
         }
-        findsubsequences(s.substring(1), ans+ s.get(0))
-        findsubsequences(s.substring(1), ans)
+        findsubsequences(s.substring(1), ans+ s.get(0), allSubstring)
+        findsubsequences(s.substring(1), ans, allSubstring)
     }
 
     fun removeRedundantFunctional(){
