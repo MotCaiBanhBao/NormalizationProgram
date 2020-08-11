@@ -1,14 +1,14 @@
-class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: MutableList<String>) {
-    val left = leftList
-    val right = rightList
-    var functionalDependency = mutableListOf<MutableList<String>>(leftList, rightList)
+class LuocDoQuanHe(leftList: MutableList<String>, private var u: String, rightList: MutableList<String>) {
+    private val left = leftList
+    private val right = rightList
+    var functionalDependency = mutableListOf(left, right)
 
 
     private fun findClosure(source:String, fDs: MutableList<MutableList<String>>):String{
         var isStillChangeAble = true
         var closure = source
         while (isStillChangeAble){
-            isStillChangeAble = false;
+            isStillChangeAble = false
             for(index in 0 until fDs[0].size)
                 if(isContains(closure, fDs[0][index])){
                     val addAttribute = fDs[1][index]
@@ -22,7 +22,7 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
     }
      private fun addAttribute(source: String, attribute: String): String{
         var result = source
-        var attributeArray = attribute.toCharArray()
+        val attributeArray = attribute.toCharArray()
         for(oneAttribute in attributeArray)
             if(!result.contains(oneAttribute))
                 result += oneAttribute
@@ -70,9 +70,9 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
         }
     }
     fun findLHSExtraneous(){
-        var sizeOfSet = functionalDependency[0].size
+        val sizeOfSet = functionalDependency[0].size
         for(temp in 0 until sizeOfSet){
-            var subString = findAllSubString(functionalDependency[0][temp])
+            val subString = findAllSubString(functionalDependency[0][temp])
             for (temp2 in subString){
                 if(isContains(findClosure(temp2, functionalDependency), functionalDependency[1][temp])){
                     functionalDependency[0][temp] = temp2
@@ -81,11 +81,15 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
             }
         }
     }
-      fun findAllSubString(source: String): MutableList<String>{
-         var allSubstring: MutableList<String> = mutableListOf()
-         findSubSequences(source, "", allSubstring)
-         allSubstring.removeAt(allSubstring.size-1)
-         allSubstring.sortBy { it.length }
+    private fun findAllSubString(source: String): MutableList<String>{
+        val allSubstring: MutableList<String> = mutableListOf()
+        findSubSequences(source, "", allSubstring)
+        allSubstring.removeAt(allSubstring.size-1)
+        allSubstring.sortBy { it.length }
+        for(i in 0 until allSubstring.size-1){
+            if(allSubstring[i].length==source.length)
+                allSubstring.removeAt(i)
+        }
          return allSubstring
      }
     private fun findSubSequences(s: String, ans: String, allSubstring: MutableList<String>){
@@ -93,13 +97,13 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
             allSubstring.add(ans)
             return
         }
-        findSubSequences(s.substring(1), ans+ s.get(0), allSubstring)
+        findSubSequences(s.substring(1), ans+ s[0], allSubstring)
         findSubSequences(s.substring(1), ans, allSubstring)
     }
 
     fun removeRedundantFunctional(){
         for(temp in 0 until functionalDependency[0].size){
-            var tempAttribute = functionalDependency[0][temp]
+            val tempAttribute = functionalDependency[0][temp]
             functionalDependency[0][temp] = "null"
             if(isContains(findClosure(tempAttribute, functionalDependency), functionalDependency[1][temp]))
                 functionalDependency[1][temp] = "null"
@@ -110,25 +114,32 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
         functionalDependency[1].removeIf{String-> String.contentEquals("null")}
     }
 
-    fun findCandidateKey(){
-        var result: MutableList<String> = mutableListOf()
-        var r = mutableLisToString(functionalDependency[1])
-        var s = setDifference(u, r)
-        if (isEqual(u, findClosure("s", functionalDependency))) {
-            println("Chỉ có 1 candidate key là $s")
-            return
+    fun findCandidateKey(): MutableList<String>{
+        val result: MutableList<String> = mutableListOf()
+        val r = mutableLisToString(functionalDependency[1])
+        val s = setDifference(u, r)
+        if (isEqual(u, findClosure(s, functionalDependency))) {
+            result.add(s)
+            return result
         }
-        var l = mutableLisToString(functionalDependency[0])
-        var lIntersectionR = intersection(l, r)
+        val l = mutableLisToString(functionalDependency[0])
+        val lIntersectionR = intersection(l, r)
         for (temp in findAllSubString(lIntersectionR)){
-            var attributeNeedCheck = temp + s
+            val attributeNeedCheck = temp + s
             if (isEqual(u, findClosure(attributeNeedCheck, functionalDependency))){
-                result.add(attributeNeedCheck)
+                if (isSubElementIn(result, attributeNeedCheck))
+                    result.add(attributeNeedCheck)
             }
         }
-        println(result)
+        return result
     }
-
+    private fun isSubElementIn(source: MutableList<String>, attribute: String): Boolean{
+        for (tempResult in source){
+            if (isContains(attribute, tempResult))
+                return false
+        }
+        return true
+    }
     private fun isEqual(source: String, needCheck: String): Boolean{
         val sourceArray = source.toCharArray()
         for (temp in sourceArray)
@@ -138,7 +149,7 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
     }
     private fun intersection(r:String, s:String): String{
         var result = ""
-        var sArray = s.toCharArray()
+        val sArray = s.toCharArray()
         for (temp in sArray){
             if(isContains(r, temp.toString()))
                 result+=temp.toString()
@@ -154,13 +165,38 @@ class LuocDoQuanHe(leftList: MutableList<String>, var u: String, rightList: Muta
     }
     private fun setDifference(source: String, attribute: String): String{
         var result = ""
-        var sourceArray = source.toCharArray()
+        val sourceArray = source.toCharArray()
         for (temp in sourceArray){
             if(!isContains(attribute, temp.toString()))
                 result+=temp.toString()
         }
         return result
     }
+
+    fun checkForm(){
+        println(if(is2NF()) "Là 2 NF" else "Không phải là 2NF")
+        /*println(if(is3NF()) "Là 3 NF" else "Không phải là 3NF")
+        println(if(isBCNF()) "Là BCNF" else "Không phải là BCNF")*/
+    }
+    private fun is2NF(): Boolean{
+        val allKey = findCandidateKey()
+        val allKeyString = allKey.toString()
+        val notPrimeKey = setDifference(u, allKeyString)
+        for (temp in allKey){
+            val subString = findAllSubString(temp)
+            for (tempSubString in subString){
+                if (isContains(findClosure(tempSubString, functionalDependency), notPrimeKey))
+                    return false
+            }
+        }
+        return true
+    }
+    /*fun is3NF(): Boolean{
+
+    }
+    fun isBCNF(): Boolean{
+
+    }*/
     fun output(fDs: MutableList<MutableList<String>>){
         for(i in 0 until fDs[0].size){
             println("${fDs[0][i]} -> ${fDs[1][i]}")
